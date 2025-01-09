@@ -1,0 +1,34 @@
+import numpy as np
+import imageio.v2 as imageio
+from scipy.ndimage import gaussian_filter
+import cv2 
+img="frds.jpeg"
+def rgb2gray(rgb):
+    return np.dot(rgb[...,:3],[0.2989,0.5870,0.1140])
+    #it is 2-dimensional array furmula to cinvert image to gray scale
+def dodge(front,back):
+    final_sketch=front*255/(255-back)
+    #if image is greater than 255 which i don't think is possible but still if it is there will convert it to 255
+    final_sketch[final_sketch>255]=255
+    final_sketch[back==255]=255
+    #to convert any suitable existing column to categorical type we will use aspect function and unit8 is for 8-bit signed integer
+    return final_sketch.astype('uint8')
+
+
+s=imageio.imread(img)#to read the given image
+gray=rgb2gray(s)# first we will image to black and white that means gray scale
+i=255-gray #0,0,0 is darkest color and 255,255,255, is for brightest color which is probably white color
+#to convert it into blur image
+blur = gaussian_filter(i, sigma=15)
+#sigma is the intensity of blurness of image
+r=dodge(blur,gray)#this function will convert our image to sketch by taking two parameter as blur and gray
+cv2.imwrite('frds-sketch.jpeg',r)
+
+
+'''How the Program Works Together
+Load the image       :  Read the input file as a NumPy array.
+Grayscale conversion :  Simplify the image to shades of gray.
+Invert the grayscale :  Highlight the lighter areas of the image.
+Apply Gaussian blur  :  Smooth the inverted image to create a "pencil stroke" effect.
+Blend with grayscale :  Use the dodge function to simulate the sketch by combining the grayscale and blurred images.
+Save the result      :  Output the final sketch image.'''
